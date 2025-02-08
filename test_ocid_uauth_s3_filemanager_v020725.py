@@ -606,8 +606,8 @@ def sidebar_content_fragment_st_file_manager_component():
         render_upload_section() # Render upload section below actions
         render_folder_management_ui() # File/folder listing
     
-    st.logout()
-
+    if st.experimental_user.is_logged_in:
+        st.button("Log out", on_click=st.logout)
 
 def main():
     with st.sidebar:
