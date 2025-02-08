@@ -605,6 +605,8 @@ def sidebar_content_fragment_st_file_manager_component():
         render_action_buttons()
         render_upload_section() # Render upload section below actions
         render_folder_management_ui() # File/folder listing
+    
+    st.logout()
 
 
 def main():
