@@ -582,7 +582,7 @@ def render_items_per_page_selector():
         st.session_state[KEY_PREFIX + '_current_page'] = 1 # Reset to page 1 when items per page changes
         st.rerun()
 
-@st.fragment
+
 def sidebar_content_fragment_st_file_manager_component():
     st.title("Lite S3 File Manager (Supabase Storage)")
 
