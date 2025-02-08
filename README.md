@@ -168,8 +168,7 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
 
 [Streamlit App Demo](https://st-supabase-s3-manager-with-ocid.streamlit.app/)
 
-![Demo GIF](streamlit_component_ocid_uauth_supabase_s3_filemanager/Streamlit Lite S3 File Manager Supabase Storage - Demo Gif 020825.gif)
-
+![Demo GIF](streamlit_component_ocid_uauth_supabase_s3_filemanager/Streamlit%20Lite%20S3%20File%20Manager%20Supabase%20Storage%20-%20Demo%20Gif%20020825.gif)
 
 **📹 Video Demonstration:**
 
