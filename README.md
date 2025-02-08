@@ -41,8 +41,6 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
         [supabase]
         SUPABASE_URL = "YOUR_SUPABASE_URL"
         SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY" # or service_role key if needed for broader access
-
-        [supabase.s3] # Supabase Storage (S3) Credentials
         SUPABASE_S3_BUCKET_NAME = "YOUR_SUPABASE_STORAGE_BUCKET_NAME"
         SUPABASE_S3_ENDPOINT_URL = "YOUR_SUPABASE_STORAGE_ENDPOINT_URL"
         SUPABASE_S3_BUCKET_REGION = "YOUR_SUPABASE_STORAGE_REGION"
@@ -50,6 +48,14 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
         SUPABASE_S3_BUCKET_SECRET_KEY = "YOUR_SUPABASE_STORAGE_SECRET_KEY"
         ```
         **Note:**  Obtain these credentials from your Supabase project settings -> Storage -> Settings.
+        ```toml
+         [auth]
+         redirect_uri = "http://localhost:8501/oauth2callback"
+         cookie_secret = "RANDOM GENERATED STRONG SECRET"
+         client_id = "Get it from Google Cloud Platform under your project"
+         client_secret = "Get it from Google Cloud Platform under your project"
+         server_metadata_url = "https://accounts.google.com/.well-known/openid-configuration"
+        ```
 
 2.  **Clone the Repository:**
     ```bash
