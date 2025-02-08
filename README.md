@@ -1,7 +1,7 @@
 # 🚀 Lite S3 File Manager Streamlit Component (Supabase Storage) 📁
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/your-streamlit-username/your-repo-name) <!-- Replace with your Streamlit Share link if deployed -->
-[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/your-github-username/your-repo-name) <!-- Replace with your GitHub repo -->
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://st-supabase-s3-manager-with-ocid.streamlit.app/) <!--  Streamlit Share link -->
+[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/HomenShum/streamlit_component_ocid_uauth_supabase_s3_filemanager) <!--  GitHub repo -->
 
 A lightweight and user-friendly Streamlit component for browsing, managing, and interacting with files stored in Supabase Storage (S3-compatible).  This component provides a simple web interface within your Streamlit application to perform common file management tasks directly in your browser.
 
@@ -86,7 +86,7 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
 4.  **Clone the Repository:**
 
     ```bash
-    git clone [repository-url]
+    git clone https://github.com/HomenShum/streamlit_component_ocid_uauth_supabase_s3_filemanager.git
     cd streamlit_component_ocid_uauth_supabase_s3_filemanager
     ```
 
@@ -162,7 +162,7 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
 
 ---
 
-**⚠️ Disclaimer:** This is a "Lite" file manager and provides basic functionalities. For more advanced features, you might need to extend or customize it further based on your specific requirements.  Remember to replace placeholders like `[repository-url]`, `your-streamlit-username/your-repo-name`, `your_streamlit_app_file.py`, `sidebar_content_fragment_st_file_manager_component`, `YOUR_SUPABASE_URL`, `YOUR_SUPABASE_KEY`, `YOUR_SUPABASE_STORAGE_BUCKET_NAME`, `YOUR_SUPABASE_STORAGE_ENDPOINT_URL`, `YOUR_SUPABASE_STORAGE_REGION`, `YOUR_SUPABASE_STORAGE_ACCESS_KEY`, `YOUR_SUPABASE_STORAGE_SECRET_KEY`, `YOUR_GOOGLE_CLIENT_ID`, `YOUR_GOOGLE_CLIENT_SECRET`, and `YOUR_RANDOM_STRONG_SECRET` with your actual values. And update the Streamlit badge link if you deploy the app to Streamlit Cloud.
+**⚠️ Disclaimer:** This is a "Lite" file manager and provides basic functionalities. For more advanced features, you might need to extend or customize it further based on your specific requirements.  Remember to replace placeholders like, `your_streamlit_app_file.py`, `sidebar_content_fragment_st_file_manager_component`, `YOUR_SUPABASE_URL`, `YOUR_SUPABASE_KEY`, `YOUR_SUPABASE_STORAGE_BUCKET_NAME`, `YOUR_SUPABASE_STORAGE_ENDPOINT_URL`, `YOUR_SUPABASE_STORAGE_REGION`, `YOUR_SUPABASE_STORAGE_ACCESS_KEY`, `YOUR_SUPABASE_STORAGE_SECRET_KEY`, `YOUR_GOOGLE_CLIENT_ID`, `YOUR_GOOGLE_CLIENT_SECRET`, and `YOUR_RANDOM_STRONG_SECRET` with your actual values.
 
 **🎬 Demo:**
 
@@ -173,19 +173,73 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
 **📹 Youtube Link:**
 https://www.youtube.com/watch?v=BTsZI-Oq-Fc
 
-## Hashtags
+## Supabase Storage Policies and SQL Examples (Publicly Viewable)
 
-### General
-- #Streamlit #Supabase #Python #OpenSource #WebApp
+**Storage Policies:**
 
-### Features
-- #S3FileManager #UserAuthentication #FileUpload #FolderManagement
+Safeguard your files with policies that define the operations allowed for users at the bucket level.  Below are some example policies (replace `14q6af7` with your unique user identifiers as needed):
 
-### Specific Technologies
-- #SupabaseStorage #GoogleLogin #OIDC
+*   **Give users access to their own folder (SELECT):**
 
-### Demo & Promotion
-- #StreamlitDemo #S3FileManagerDemo #WebAppComponent
+    ```sql
+    -- Policy Name: Give users access to own folder (SELECT)
+    -- Policy Target:  SELECT
+    -- Using Expression:  auth.uid() = '14q6af7_0'  -- Example:  Replace with your logic
+    ```
+*    **Give users access to own folder (INSERT):**
+    ```sql
+    -- Policy Name: Give users access to own folder (INSERT)
+    -- Policy Target: INSERT
+    -- WITH CHECK Expression: auth.uid() = '14q6af7_1' -- Example: Replace
+    ```
+* **Give users access to own folder (UPDATE):**
+    ```sql
+    -- Policy Name: Give users access to own folder (UPDATE)
+    -- Policy Target: UPDATE
+    -- Using Expression: auth.uid() = '14q6af7_2' -- Example: Replace
+    -- WITH CHECK Expression: auth.uid() = '14q6af7_2' -- Example: Replace
+    ```
+*   **Give users access to own folder (DELETE):**
+    ```sql
+     -- Policy Name: Give users access to own folder (DELETE)
+    -- Policy Target: DELETE
+    -- Using Expression: auth.uid() = '14q6af7_3'  -- Example: Replace
+    ```
 
-### For Discoverability
-- #StreamlitFileManager #SupabaseStorageManager #PythonWebApp
+**SQL Examples:**
+
+The following SQL code demonstrates how to create tables for managing user data and storage information, along with setting up Row Level Security (RLS) policies.  This provides a basic structure for linking users to their respective folders in Supabase Storage.
+
+```sql
+-- Create the users table with id as uuid
+CREATE TABLE public.users (
+    id uuid primary key,
+    email text NOT NULL,
+    name text,
+    google_sub text,      -- For linking to Google User ID
+    created_at timestamp with time zone default now(),
+    CONSTRAINT users_email_unique UNIQUE (email)
+);
+
+-- Create the storage table with user_id referencing the users table
+CREATE TABLE public.storage (
+    id bigint primary key generated always as identity,
+    bucket_id text,  --  Store the bucket name here (e.g., 'my-documents')
+    foldername text,  -- The folder path within the bucket
+    user_id uuid references public.users(id) on delete cascade,
+    created_at timestamp with time zone default now()
+);
+
+-- Create the RLS policy for the storage table
+-- This allows users to SELECT their own folders within *their* bucket.
+CREATE POLICY "Allow user access to their own folders"
+ON public.storage
+FOR SELECT
+USING (
+    bucket_id = 'YOUR_BUCKET_NAME' AND  --  IMPORTANT: Replace 'YOUR_BUCKET_NAME' with your actual bucket name
+    user_id = auth.uid()
+);
+
+-- Enable Row Level Security on the storage table
+ALTER TABLE public.storage ENABLE ROW LEVEL SECURITY;
+```
