@@ -170,9 +170,8 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
 
 ![Streamlit Lite S3 File Manager Supabase Storage - Demo Gif](https://github.com/HomenShum/streamlit_component_ocid_uauth_supabase_s3_filemanager/raw/main/Streamlit%20Lite%20S3%20File%20Manager%20Supabase%20Storage%20-%20Demo%20Gif%20020825.gif)
 
-**📹 Video Demonstration:**
-
-[![YouTube Video](https://img.youtube.com/vi/BTsZI-Oq-Fc/0.jpg)](https://www.youtube.com/watch?v=BTsZI-Oq-Fc)
+**📹 Youtube Link:**
+https://www.youtube.com/watch?v=BTsZI-Oq-Fc
 
 ## Hashtags
 
