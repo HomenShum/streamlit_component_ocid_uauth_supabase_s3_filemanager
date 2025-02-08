@@ -3,7 +3,6 @@
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/your-streamlit-username/your-repo-name) <!-- Replace with your Streamlit Share link if deployed -->
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/your-github-username/your-repo-name) <!-- Replace with your GitHub repo -->
 
-
 A lightweight and user-friendly Streamlit component for browsing, managing, and interacting with files stored in Supabase Storage (S3-compatible).  This component provides a simple web interface within your Streamlit application to perform common file management tasks directly in your browser.
 
 **✨ Features:**
@@ -168,6 +167,9 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
 **🎬 Demo:**
 
 [Streamlit App Demo](https://st-supabase-s3-manager-with-ocid.streamlit.app/)
+
+![Demo GIF](./Streamlit Lite S3 File Manager Supabase Storage - Demo Gif 020825.gif)
+
 
 **📹 Video Demonstration:**
 
