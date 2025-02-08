@@ -5,6 +5,10 @@ import os
 from botocore.exceptions import NoCredentialsError, ClientError
 import math # For pagination
 import pandas as pd
+from io import BytesIO
+import base64
+from pptx import Presentation # Ensure pptx is installed: pip install python-pptx
+
 
 # Initialize Supabase client
 supabase_url = st.secrets['supabase']['SUPABASE_URL']
@@ -602,13 +606,165 @@ def sidebar_content_fragment_st_file_manager_component():
         render_upload_section() # Render upload section below actions
         render_folder_management_ui() # File/folder listing
 
-    # Logout button
-    if st.button("Log out"):
-        st.logout()
 
 def main():
     with st.sidebar:
         sidebar_content_fragment_st_file_manager_component()
+
+    selected_documents = st.session_state[KEY_PREFIX + '_selected_files'] + st.session_state[KEY_PREFIX + '_selected_files_in_folders']
+
+    if selected_documents:
+        st.subheader("Selected Documents Preview:")
+        # No changes needed in the preview section to accommodate multiple files.
+        # The existing tab logic already handles displaying multiple files in separate tabs.
+        tab_names = [f"{f[:10]}...{f[-10:]}" if len(f) > 25 else f for f in map(os.path.basename, selected_documents)]
+        tabs = st.tabs(tab_names)
+
+        for idx, file_path in enumerate(selected_documents):
+            with tabs[idx]:
+                if len(selected_documents) > 1:
+                    with st.popover("Tips 💡"):
+                        st.write("Scroll horizontally to view and select all documents.")
+
+                corpus_path = os.path.dirname(file_path)
+                corpus_name = os.path.basename(corpus_path)
+                st.write(f"**Corpus:** {corpus_name}, **Document:** {os.path.basename(file_path)}") # Display corpus name
+
+                if file_path.endswith(".pdf"):
+                    st.write(f"File type: PDF")
+                    file_content = download_file_from_s3(file_path)
+                    if file_content:
+                        base64_pdf = base64.b64encode(file_content).decode('utf-8')
+                        pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800px" type="application/pdf"></iframe>'
+                        st.markdown(pdf_display, unsafe_allow_html=True)
+                    else:
+                        st.error("Failed to load PDF content.")
+
+                elif file_path.endswith((".csv", ".tsv")):
+                    file_content = download_file_from_s3(file_path)
+                    if file_content:
+                        try:
+                            df = pd.read_csv(BytesIO(file_content))
+                            st.dataframe(df)
+                        except Exception as e:
+                            st.error(f"Error reading CSV/TSV: {e}")
+                    else:
+                        st.error("Failed to load CSV/TSV content.")
+                elif file_path.endswith((".xlsx", ".xls")):
+                    file_content = download_file_from_s3(file_path)
+                    if file_content:
+                        try:
+                            if file_path.endswith(".xlsx"):
+                                df = pd.read_excel(BytesIO(file_content), engine='openpyxl') # Specify engine for xlsx
+                            elif file_path.endswith(".xls"):
+                                df = pd.read_excel(BytesIO(file_content), engine='xlrd') # Specify engine for xls
+                            else: # Fallback if somehow extension is not recognized
+                                df = pd.read_excel(BytesIO(file_content)) # Let pandas try to infer
+                            st.dataframe(df)
+                        except Exception as e:
+                            st.error(f"Error reading Excel file: {e}")
+                    else:
+                        st.error("Failed to load Excel content.")
+                elif file_path.endswith((".doc", ".docx", ".txt", ".html", ".md", ".rtf")):
+                    file_content = download_file_from_s3(file_path)
+                    if file_content:
+                        try:
+                            text_content = file_content.decode('utf-8', errors='ignore') # Handle encoding issues
+                            with st.container(border=True):
+                                st.markdown(text_content)
+                        except Exception as e:
+                            st.error(f"Error displaying text-based file: {e}")
+                    else:
+                        st.error("Failed to load text-based file content.")
+                elif file_path.endswith((".json", ".xml")):
+                    file_content = download_file_from_s3(file_path)
+                    if file_content:
+                        try:
+                            df = pd.read_json(BytesIO(file_content)) if file_path.endswith(".json") else pd.read_xml(BytesIO(file_content))
+                            st.dataframe(df)
+                        except Exception as e:
+                            st.error(f"Error reading JSON/XML: {e}")
+                    else:
+                        st.error("Failed to load JSON/XML content.")
+                elif file_path.endswith((".mp4", ".avi", ".mov", ".webm", ".mkv")):
+                    # Need to create a temporary local file for st.video to work with S3 content efficiently
+                    file_content = download_file_from_s3(file_path)
+                    if file_content:
+                        try:
+                            temp_video_file = BytesIO(file_content)
+                            st.video(temp_video_file)
+                        except Exception as e:
+                            st.error(f"Error displaying video: {e}")
+                    else:
+                        st.error("Failed to load video content.")
+                elif file_path.endswith((".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg")):
+                    file_content = download_file_from_s3(file_path)
+                    if file_content:
+                        try:
+                            st.image(BytesIO(file_content))
+                        except Exception as e:
+                            st.error(f"Error displaying image: {e}")
+                    else:
+                        st.error("Failed to load image content.")
+                elif file_path.endswith((".mp3", ".wav", ".ogg", ".flac")):
+                    file_content = download_file_from_s3(file_path)
+                    if file_content:
+                        try:
+                            st.audio(BytesIO(file_content))
+                        except Exception as e:
+                            st.error(f"Error displaying audio: {e}")
+                    else:
+                        st.error("Failed to load audio content.")
+                elif file_path.endswith((".py", ".js", ".java", ".cpp", ".cs", ".rb")):
+                    file_content = download_file_from_s3(file_path)
+                    if file_content:
+                        try:
+                            code_content = file_content.decode('utf-8', errors='ignore')
+                            with st.container(border=True):
+                                st.code(code_content, language=file_path.split('.')[-1])
+                        except Exception as e:
+                            st.error(f"Error displaying code file: {e}")
+                    else:
+                        st.error("Failed to load code file content.")
+                elif file_path.endswith((".ppt", ".pptx")):
+                    file_content = download_file_from_s3(file_path)
+                    if file_content:
+                        try:
+                            prs = Presentation(BytesIO(file_content))
+                            pdf_buffer = BytesIO()
+                            c = canvas.Canvas(pdf_buffer, pagesizes=letter)
+
+                            for slide in prs.slides:
+                                c.drawString(100, 750, f"Slide {prs.slides.index(slide) + 1}")
+                                for shape in slide.shapes:
+                                    if hasattr(shape, 'text'):
+                                        c.drawString(100, 700, shape.text[:50])  # Truncate long texts
+                                c.showPage()
+
+                            c.save()
+                            pdf_bytes = base64.b64encode(pdf_buffer.getvalue()).decode('utf-8') # Corrected base64 encoding
+                            pdf_display = f'<iframe src="data:application/pdf;base64,{pdf_bytes}" width="100%" height="500px" type="application/pdf"></iframe>'
+                            st.markdown(pdf_display, unsafe_allow_html=True)
+                        except ImportError:
+                            st.write("PowerPoint file detected. Preview not available due to missing dependencies.")
+                        except Exception as e:
+                            st.error(f"Error displaying PowerPoint: {e}")
+                    else:
+                        st.error("Failed to load PowerPoint content.")
+
+                elif file_path.endswith(".zip"):
+                    st.write("ZIP file detected. Contents cannot be displayed directly.")
+                elif file_path.endswith((".accdb", ".mdb")):
+                    st.write("Access database file detected. Preview not available.")
+                elif file_path.endswith(".mpp"):
+                    st.write("Microsoft Project file detected. Preview not available.")
+                elif file_path.endswith((".one", ".onetoc2")):
+                    st.write("OneNote file detected. Preview not available.")
+                elif file_path.endswith(".vsd"):
+                    st.write("Visio drawing file detected. Preview not available.")
+                else:
+                    st.write("Unsupported document type")
+
 
 if __name__ == "__main__":
     main()
