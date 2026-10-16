@@ -5,6 +5,14 @@
 
 A lightweight and user-friendly Streamlit component for browsing, managing, and interacting with files stored in Supabase Storage (S3-compatible).  This component provides a simple web interface within your Streamlit application to perform common file management tasks directly in your browser.
 
+## Source entrypoint and limits
+
+The tracked app is [test_ocid_uauth_s3_filemanager_v020725.py](test_ocid_uauth_s3_filemanager_v020725.py), which launches `main()` and renders the sidebar file manager. Its `test_` filename does not make it an offline test command. Use [requirements.txt](requirements.txt), complete the secrets setup below, then use the concrete Usage command. The module initializes its Supabase and S3 clients from Streamlit secrets before the login UI.
+
+The source gates the file-manager UI on Streamlit login, derives the initial folder prefix from the logged-in display name, and sends S3 requests using the configured app credentials. This is not proof of per-user storage authorization or tenant isolation. Uploads, folder creation, file deletion and recursive folder deletion change the configured storage; the SQL/policy examples below are not evidence that those policies are applied.
+
+This handoff is based on source at `cc67a4f94221551a14ba48a42bcb344ee0a97d6b`. Dependency installation, OIDC/provider compatibility, storage behavior, security and rendered UI were not tested for this review. See the [README history](CHANGELOG/docs/readme.md).
+
 **✨ Features:**
 
 *   **📂 Browse S3 Buckets:** Navigate your Supabase Storage bucket's folders and files in a tree-like structure.
@@ -18,7 +26,7 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
 *   **ℹ️ File Information:** Display file name, type, and size.
 *   **☑️ Selection & Actions:** Select files and folders for batch actions (currently only folder deletion is implemented in batch).
 *   **🔢 Pagination:**  Browse large folders with configurable items per page.
-*   **🔒 User Authentication:** Leverages Streamlit's built-in user authentication (OpenID Connect - Google Identity) for secure access.
+*   **🔒 User Authentication:** Leverages Streamlit's built-in user authentication (OpenID Connect - Google Identity) as the application's UI login gate.
 *   **📊 "Selected Items" DataFrame:** Displays a summary of selected folders and files in a Pandas DataFrame.
 *   **🧭 Responsive Path Navigation:**  Breadcrumb-style path display with clickable components for easy navigation.
 
@@ -93,9 +101,7 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
 5.  **Install Dependencies:**
 
     ```bash
-    pip install -r requirements.txt # if you have a requirements.txt
-    # or
-    pip install streamlit supabase boto3 pandas
+    pip install -r requirements.txt
     ```
 
 **🚀 Usage:**
@@ -103,14 +109,14 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
 1.  **Run the Streamlit app:**
 
     ```bash
-    streamlit run your_streamlit_app_file.py # e.g., streamlit run app.py
+    streamlit run test_ocid_uauth_s3_filemanager_v020725.py
     ```
 
 2.  **Integrate the component into your Streamlit app:**
 
     ```python
     import streamlit as st
-    from sidebar_content_fragment_st_file_manager_component import sidebar_content_fragment_st_file_manager_component  # Assuming your component code is in this file
+    from test_ocid_uauth_s3_filemanager_v020725 import sidebar_content_fragment_st_file_manager_component
 
     def main():
         if not st.experimental_user.is_logged_in:
@@ -129,7 +135,7 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
         main()
     ```
 
-    *   Make sure to replace `your_streamlit_app_file.py` and `sidebar_content_fragment_st_file_manager_component` with your actual file and function names.
+    *   The tracked module initializes Supabase and S3 clients from `st.secrets` when imported. Configure the secrets above first. This integration example is source-based and was not executed for this handoff.
     *   The component is designed to be placed in the Streamlit sidebar for a cleaner layout.
     *   The example code demonstrates basic user login and logout using `st.experimental_user`, `st.login()`, and `st.logout()`.
     *   The `st.stop()` after `st.login()` prevents the rest of the app from running until the user successfully logs in, simplifying the control flow.
@@ -162,7 +168,7 @@ A lightweight and user-friendly Streamlit component for browsing, managing, and 
 
 ---
 
-**⚠️ Disclaimer:** This is a "Lite" file manager and provides basic functionalities. For more advanced features, you might need to extend or customize it further based on your specific requirements.  Remember to replace placeholders like, `your_streamlit_app_file.py`, `sidebar_content_fragment_st_file_manager_component`, `YOUR_SUPABASE_URL`, `YOUR_SUPABASE_KEY`, `YOUR_SUPABASE_STORAGE_BUCKET_NAME`, `YOUR_SUPABASE_STORAGE_ENDPOINT_URL`, `YOUR_SUPABASE_STORAGE_REGION`, `YOUR_SUPABASE_STORAGE_ACCESS_KEY`, `YOUR_SUPABASE_STORAGE_SECRET_KEY`, `YOUR_GOOGLE_CLIENT_ID`, `YOUR_GOOGLE_CLIENT_SECRET`, and `YOUR_RANDOM_STRONG_SECRET` with your actual values.
+**⚠️ Disclaimer:** This is a "Lite" file manager and provides basic functionalities. For more advanced features, you might need to extend or customize it further based on your specific requirements.  Remember to replace credential/configuration placeholders like `YOUR_SUPABASE_URL`, `YOUR_SUPABASE_KEY`, `YOUR_SUPABASE_STORAGE_BUCKET_NAME`, `YOUR_SUPABASE_STORAGE_ENDPOINT_URL`, `YOUR_SUPABASE_STORAGE_REGION`, `YOUR_SUPABASE_STORAGE_ACCESS_KEY`, `YOUR_SUPABASE_STORAGE_SECRET_KEY`, `YOUR_GOOGLE_CLIENT_ID`, `YOUR_GOOGLE_CLIENT_SECRET`, and `YOUR_RANDOM_STRONG_SECRET` with your actual values.
 
 **🎬 Demo:**
 
